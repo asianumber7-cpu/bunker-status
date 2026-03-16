@@ -33,13 +33,13 @@
         <div class="bg-gray-800/50 rounded-xl border border-gray-700 p-6 space-y-4">
             <h3 class="text-lg font-semibold border-b border-gray-700 pb-2">System Components</h3>
             <div id="components-list" class="space-y-3">
-                </div>
+            </div>
         </div>
 
         <div class="bg-gray-800/50 rounded-xl border border-gray-700 p-6">
             <h3 class="text-lg font-semibold border-b border-gray-700 pb-2 mb-4">Incident Updates</h3>
             <div id="updates-list" class="space-y-6 pl-4 border-l-2 border-gray-700">
-                </div>
+            </div>
         </div>
     </div>
 
@@ -58,7 +58,6 @@
 
         async function fetchStatus() {
             try {
-                // 캐시 방지를 위해 타임스탬프 추가
                 const response = await fetch('status.json?t=' + new Date().getTime());
                 const data = await response.json();
                 renderStatus(data);
@@ -71,7 +70,6 @@
         function renderStatus(data) {
             const globalConf = statusColors[data.global_status] || statusColors['outage'];
             
-            // Main Status
             const icon = document.getElementById('status-icon');
             icon.className = `w-6 h-6 rounded-full ${globalConf.bg}`;
             document.getElementById('status-title').innerText = data.global_status === 'operational' ? 'All Systems Operational' : 'System Issues Detected';
@@ -84,44 +82,59 @@
                 document.getElementById('recovery-eta').innerText = data.estimated_recovery_time;
             }
 
-            // Components
             const compList = document.getElementById('components-list');
             compList.innerHTML = '';
             for (const [key, status] of Object.entries(data.components)) {
                 const conf = statusColors[status];
                 const name = componentNames[key] || key;
-                compList.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-800 p-3 rounded shadow-sm border border-gray-700/50">
-                        <span class="font-medium text-gray-200">${name}</span>
-                        <span class="${conf.text} font-semibold flex items-center">
-                            <span class="w-2 h-2 rounded-full ${conf.bg.split(' ')[0]} mr-2"></span>
-                            ${conf.label}
-                        </span>
-                    </div>
-                `;
+                
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-gray-800 p-3 rounded shadow-sm border border-gray-700/50';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'font-medium text-gray-200';
+                nameSpan.textContent = name;
+                
+                const statusSpan = document.createElement('span');
+                statusSpan.className = `${conf.text} font-semibold flex items-center`;
+                statusSpan.innerHTML = `<span class="w-2 h-2 rounded-full ${conf.bg.split(' ')[0]} mr-2"></span>`;
+                statusSpan.appendChild(document.createTextNode(conf.label));
+                
+                div.appendChild(nameSpan);
+                div.appendChild(statusSpan);
+                compList.appendChild(div);
             }
 
-            // Updates
             const updatesList = document.getElementById('updates-list');
             updatesList.innerHTML = '';
             if (data.updates && data.updates.length > 0) {
                 data.updates.forEach(update => {
-                    updatesList.innerHTML += `
-                        <div class="relative">
-                            <div class="absolute -left-[1.35rem] mt-1.5 w-3 h-3 bg-gray-600 rounded-full border-2 border-gray-900"></div>
-                            <span class="text-xs font-bold text-gray-400 block mb-1">${update.time}</span>
-                            <p class="text-gray-300 text-sm leading-relaxed">${update.message}</p>
-                        </div>
-                    `;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative';
+                    
+                    const dot = document.createElement('div');
+                    dot.className = 'absolute -left-[1.35rem] mt-1.5 w-3 h-3 bg-gray-600 rounded-full border-2 border-gray-900';
+                    
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'text-xs font-bold text-gray-400 block mb-1';
+                    timeSpan.textContent = update.time; // [H-1 잔존 XSS 완벽 차단]
+                    
+                    const p = document.createElement('p');
+                    p.className = 'text-gray-300 text-sm leading-relaxed';
+                    p.textContent = update.message; // [H-1 잔존 XSS 완벽 차단]
+                    
+                    wrapper.appendChild(dot);
+                    wrapper.appendChild(timeSpan);
+                    wrapper.appendChild(p);
+                    
+                    updatesList.appendChild(wrapper);
                 });
             } else {
                 updatesList.innerHTML = '<p class="text-gray-500 text-sm">No recent incident updates.</p>';
             }
         }
 
-        // 초기 로드
         fetchStatus();
-        // 1분마다 상태 갱신
         setInterval(fetchStatus, 60000);
     </script>
 </body>
