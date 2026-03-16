@@ -1,0 +1,20 @@
+{
+  "global_status": "outage",
+  "message": "현재 클라우드 인프라 장애로 API 및 대시보드 접속이 제한되고 있습니다. 고객 PC에 설치된 Agent의 로컬 방어(랜섬웨어 탐지, 자가 보호) 기능은 서버 연결과 무관하게 100% 정상 작동 중이니 안심하시기 바랍니다.",
+  "estimated_recovery_time": "2026-03-20 16:30 KST",
+  "components": {
+    "api_server": "outage",
+    "customer_dashboard": "outage",
+    "agent_defense": "operational"
+  },
+  "updates": [
+    {
+      "time": "2026-03-20 15:15 KST",
+      "message": "데이터베이스 시점 복구(PITR) 파이프라인 가동 및 무결성 검증 중입니다."
+    },
+    {
+      "time": "2026-03-20 15:00 KST",
+      "message": "메인 인프라 데이터베이스 접속 장애를 감지하여 원인 파악 중입니다."
+    }
+  ]
+}
